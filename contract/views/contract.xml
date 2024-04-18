@@ -250,11 +250,17 @@
                                     />
                                     <field name="recurring_next_date" invisible="1" />
                                     <field name="date_start" invisible="1" />
-                                    <field name="date_end" />
+                                    <field name="date_end" invisible="1" />
                                     <field
                                         name="last_date_invoiced"
                                         groups="base.group_no_one"
                                     />
+                                    <field
+                                        name="next_period_date_start"
+                                        invisible="1"
+                                    />
+                                    <field name="next_period_date_end" invisible="1" />
+
                                     <field
                                         name="create_invoice_visibility"
                                         invisible="1"
