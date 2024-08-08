@@ -15,6 +15,7 @@
         "sale_timesheet",
     ],
     "data": [
+        'views/project_task.xml',
         'views/contract_contract.xml',
         "views/project_project.xml",
     ],
