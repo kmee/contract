@@ -22,6 +22,7 @@ class ContractLine(models.Model):
         "analytic.mixin",
     ]
     _order = "sequence,id"
+    _rec_names_search = ["name", "contract_id.name"]
 
     sequence = fields.Integer()
     contract_id = fields.Many2one(
@@ -1063,3 +1064,15 @@ class ContractLine(models.Model):
     ):
         self.ensure_one()
         return self.quantity if not self.display_type else 0.0
+
+    def name_get(self):
+        result = []
+        for record in self.sudo():
+            name = "%s - %s" % (
+                record.contract_id.name,
+                record.name and record.name.split("\n")[0] or record.product_id.name,
+            )
+            if record.contract_id.code:
+                name = "%s (%s)" % (name, record.contract_id.code)
+            result.append((record.id, name))
+        return result
