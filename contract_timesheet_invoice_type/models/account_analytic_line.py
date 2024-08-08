@@ -8,7 +8,7 @@ class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
     contract_line_id = fields.Many2one(
-        related="project_id.contract_line_id",
+        comodel_name="contract.line"
     )
 
     @api.depends("contract_line_id.product_id", "amount")

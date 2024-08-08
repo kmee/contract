@@ -12,6 +12,10 @@
                 <field name="contract_id" attrs="{'invisible': True}" groups="sales_team.group_sale_salesman"/>
                 <field name="contract_line_id" groups="sales_team.group_sale_salesman"/>
             </xpath>
+            <xpath expr="//field[@name='timesheet_ids']/tree/field[@name='unit_amount']" position="before">
+                <!-- <field name="timesheet_ids"/> is already inside a block groups="hr_timesheet.group_hr_timesheet_user"  -->
+                <field name="contract_line_id" />
+            </xpath>
         </field>
     </record>
 
