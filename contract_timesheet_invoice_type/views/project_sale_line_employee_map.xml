@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2024 KMEE
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+
+<odoo>
+
+    <record model="ir.ui.view" id="project_sale_line_employee_map_form_view">
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="sale_timesheet.project_project_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/field[@name='sale_line_id']" position="before">
+                <field name="contract_id" optional="hide"/>
+                <field name="contract_line_id" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
