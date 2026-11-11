@@ -160,10 +160,10 @@ class ContractRecurringMixin(models.AbstractModel):
                 rec.next_period_date_start,
                 rec.recurring_invoicing_type,
                 rec.recurring_invoicing_offset,
-                rec.recurring_invoicing_offset_type,
                 rec.recurring_rule_type,
                 rec.recurring_interval,
                 max_date_end=rec.date_end,
+                recurring_invoicing_offset_type=rec.recurring_invoicing_offset_type,
             )
 
     # === Utility Methods ===
@@ -238,12 +238,16 @@ class ContractRecurringMixin(models.AbstractModel):
         next_period_date_start,
         recurring_invoicing_type,
         recurring_invoicing_offset,
-        recurring_invoicing_offset_type,
         recurring_rule_type,
         recurring_interval,
         max_date_end,
+        recurring_invoicing_offset_type="daily",
     ):
-        """Compute the date of the next invoice based on all parameters."""
+        """Compute the date of the next invoice based on all parameters.
+
+        ``recurring_invoicing_offset_type`` is last and defaults to days so that
+        callers (and overrides) written before it existed keep working.
+        """
         next_period_date_end = self.get_next_period_date_end(
             next_period_date_start,
             recurring_rule_type,
@@ -281,9 +285,10 @@ class ContractRecurringMixin(models.AbstractModel):
         else:
             invoice_offset = relativedelta(days=1)
 
-        if recurring_invoicing_offset != 0 and recurring_invoicing_offset_type:
+        if recurring_invoicing_offset:
             invoice_offset += self.get_relative_delta(
-                recurring_invoicing_offset_type, recurring_invoicing_offset
+                recurring_invoicing_offset_type or "daily",
+                recurring_invoicing_offset,
             )
 
         return invoice_offset
