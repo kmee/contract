@@ -288,6 +288,22 @@ class ContractTemplateLine(models.Model):
         self._set_recurrence_field("recurring_next_date")
         return res
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        # The unit has a default, which would otherwise win over the value
+        # computed from the contract when the line is created without it.
+        comodel = self.env[self._fields["contract_id"].comodel_name]
+        for vals in vals_list:
+            if vals.get("contract_id") and not vals.get(
+                "recurring_invoicing_offset_type"
+            ):
+                contract = comodel.browse(vals["contract_id"])
+                if not contract.line_recurrence:
+                    vals["recurring_invoicing_offset_type"] = (
+                        contract.recurring_invoicing_offset_type
+                    )
+        return super().create(vals_list)
+
     # === Constraints & Onchange ===
 
     @api.constrains("discount")

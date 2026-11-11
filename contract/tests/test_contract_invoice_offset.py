@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import Command
+from odoo.tests import Form
 
 from .test_contract import TestContractBase, to_date
 
@@ -64,9 +65,7 @@ class TestContractInvoiceOffset(TestContractBase):
         return contract._get_related_invoices().sorted("invoice_date")
 
     def _cron(self, date_ref):
-        self.env["contract.contract"].cron_recurring_create_invoice(
-            to_date(date_ref)
-        )
+        self.env["contract.contract"].cron_recurring_create_invoice(to_date(date_ref))
 
     def _assert_two_cycles(self, contract):
         line = contract.contract_line_ids
@@ -120,6 +119,38 @@ class TestContractInvoiceOffset(TestContractBase):
                 "recurring_invoicing_offset_type": "weekly",
             }
         )
+        self.assertEqual(line.recurring_invoicing_offset, -1)
+        self.assertEqual(line.recurring_invoicing_offset_type, "weekly")
+        self.assertEqual(line.recurring_next_date, to_date("2026-11-24"))
+
+    def test_header_offset_unit_on_create(self):
+        """A line created with the contract takes the unit of the header."""
+        contract = self._create_contract(
+            recurring_invoicing_offset=-1,
+            recurring_invoicing_offset_type="weekly",
+        )
+        line = contract.contract_line_ids
+        self.assertEqual(line.recurring_invoicing_offset_type, "weekly")
+        self.assertEqual(line.recurring_next_date, to_date("2026-11-24"))
+
+    def test_header_offset_propagates_in_form(self):
+        """Header offset (value and unit) filled in the form reaches the line."""
+        contract_form = Form(
+            self.env["contract.contract"].with_context(
+                default_contract_type="purchase"
+            ),
+            view="contract.contract_contract_supplier_form_view",
+        )
+        contract_form.partner_id = self.partner
+        contract_form.name = "Form offset contract"
+        contract_form.line_recurrence = False
+        contract_form.date_start = "2026-12-01"
+        contract_form.recurring_invoicing_offset = -1
+        contract_form.recurring_invoicing_offset_type = "weekly"
+        with contract_form.contract_line_fixed_ids.new() as line_form:
+            line_form.product_id = self.product_1
+        contract = contract_form.save()
+        line = contract.contract_line_ids
         self.assertEqual(line.recurring_invoicing_offset, -1)
         self.assertEqual(line.recurring_invoicing_offset_type, "weekly")
         self.assertEqual(line.recurring_next_date, to_date("2026-11-24"))
