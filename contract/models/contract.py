@@ -196,10 +196,12 @@ class ContractContract(models.Model):
                     contract.next_period_date_start,
                     contract.recurring_invoicing_type,
                     contract.recurring_invoicing_offset,
-                    contract.recurring_invoicing_offset_type,
                     contract.recurring_rule_type,
                     contract.recurring_interval,
                     max_date_end=contract.date_end,
+                    recurring_invoicing_offset_type=(
+                        contract.recurring_invoicing_offset_type
+                    ),
                 )
             else:
                 contract.recurring_next_date = min(recurring_next_date)

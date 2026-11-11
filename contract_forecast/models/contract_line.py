@@ -106,10 +106,12 @@ class ContractLine(models.Model):
                         period_date_start,
                         rec.recurring_invoicing_type,
                         rec.recurring_invoicing_offset,
-                        rec.recurring_invoicing_offset_type,
                         rec.recurring_rule_type,
                         rec.recurring_interval,
                         max_date_end=max_date_end,
+                        recurring_invoicing_offset_type=(
+                            rec.recurring_invoicing_offset_type
+                        ),
                     )
 
         return self.env["contract.line.forecast.period"].create(values)
