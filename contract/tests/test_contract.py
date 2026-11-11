@@ -739,14 +739,14 @@ class TestContract(TestContractBase):
             ),
             (
                 to_date("2018-02-01"),
-                (to_date("2018-01-01"), "post-paid", 1, "monthly", 1, False),
+                (to_date("2018-01-01"), "post-paid", 0, "monthly", 1, False),
             ),
             (
                 to_date("2018-01-16"),
                 (
                     to_date("2018-01-01"),
                     "post-paid",
-                    1,
+                    0,
                     "monthly",
                     1,
                     to_date("2018-01-15"),
@@ -757,7 +757,7 @@ class TestContract(TestContractBase):
                 (
                     to_date("2018-01-16"),
                     "post-paid",
-                    1,
+                    0,
                     "monthly",
                     1,
                     to_date("2018-01-15"),
@@ -765,7 +765,7 @@ class TestContract(TestContractBase):
             ),
             (
                 to_date("2018-03-01"),
-                (to_date("2018-01-01"), "post-paid", 1, "monthly", 2, False),
+                (to_date("2018-01-01"), "post-paid", 0, "monthly", 2, False),
             ),
             (
                 to_date("2018-01-31"),
@@ -789,7 +789,7 @@ class TestContract(TestContractBase):
             ),
             (
                 to_date("2019-01-05"),
-                (to_date("2018-01-05"), "post-paid", 1, "yearly", 1, False),
+                (to_date("2018-01-05"), "post-paid", 0, "yearly", 1, False),
             ),
         ]
         contract_line_env = self.env["contract.line"]
