@@ -80,12 +80,7 @@ class ContractLine(models.Model):
                 ]._get_distribution(line._get_analytic_distribution_arguments())
                 line.analytic_distribution = distribution or line.analytic_distribution
 
-    @api.constrains(
-        "recurring_next_date",
-        "date_start",
-        "recurring_invoicing_offset",
-        "recurring_invoicing_offset_type",
-    )
+    @api.constrains("recurring_next_date", "date_start")
     def _check_recurring_next_date_start_date(self):
         for line in self:
             if (
@@ -135,9 +130,19 @@ class ContractLine(models.Model):
                     )
                     % rec.name
                 )
+            # The invoice date is shifted from the period by the invoicing
+            # offset (e.g. a pre-paid invoice issued 7 days before the period
+            # starts), so compare the period it refers to, not the invoice date.
             if (
                 rec.recurring_next_date
-                and rec.recurring_next_date <= rec.last_date_invoiced
+                and rec.recurring_next_date
+                - rec._get_invoicing_offset_relative_delta(
+                    rec.recurring_invoicing_type,
+                    rec.recurring_rule_type,
+                    rec.recurring_invoicing_offset,
+                    rec.recurring_invoicing_offset_type,
+                )
+                <= rec.last_date_invoiced
             ):
                 raise ValidationError(
                     self.env._(
