@@ -135,6 +135,19 @@ class ContractTemplateLine(models.Model):
         required=True,
         copy=True,
     )
+    recurring_invoicing_offset = fields.Integer(
+        compute="_compute_recurring_invoicing_offset",
+        store=True,
+        readonly=False,
+        copy=True,
+    )
+    recurring_invoicing_offset_type = fields.Selection(
+        compute="_compute_recurring_invoicing_offset_type",
+        store=True,
+        readonly=False,
+        required=True,
+        copy=True,
+    )
     date_start = fields.Date(
         compute="_compute_date_start",
         store=True,
@@ -249,15 +262,47 @@ class ContractTemplateLine(models.Model):
     def _compute_recurring_interval(self):
         self._set_recurrence_field("recurring_interval")
 
+    @api.depends(
+        "contract_id.recurring_invoicing_offset", "contract_id.line_recurrence"
+    )
+    def _compute_recurring_invoicing_offset(self):
+        self._set_recurrence_field("recurring_invoicing_offset")
+
+    @api.depends(
+        "contract_id.recurring_invoicing_offset_type", "contract_id.line_recurrence"
+    )
+    def _compute_recurring_invoicing_offset_type(self):
+        self._set_recurrence_field("recurring_invoicing_offset_type")
+
     @api.depends("contract_id.date_start", "contract_id.line_recurrence")
     def _compute_date_start(self):
         self._set_recurrence_field("date_start")
 
-    @api.depends("contract_id.line_recurrence")
+    @api.depends(
+        "contract_id.line_recurrence",
+        "recurring_invoicing_offset",
+        "recurring_invoicing_offset_type",
+    )
     def _compute_recurring_next_date(self):
         res = super()._compute_recurring_next_date()
         self._set_recurrence_field("recurring_next_date")
         return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # The unit has a default, which would otherwise win over the value
+        # computed from the contract when the line is created without it.
+        comodel = self.env[self._fields["contract_id"].comodel_name]
+        for vals in vals_list:
+            if vals.get("contract_id") and not vals.get(
+                "recurring_invoicing_offset_type"
+            ):
+                contract = comodel.browse(vals["contract_id"])
+                if not contract.line_recurrence:
+                    vals["recurring_invoicing_offset_type"] = (
+                        contract.recurring_invoicing_offset_type
+                    )
+        return super().create(vals_list)
 
     # === Constraints & Onchange ===
 
